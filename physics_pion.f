@@ -39,6 +39,7 @@
 
 	integer final_state, ipi
 	logical first,low_w_flag
+	save first
 
 	data first /.TRUE./
 cdg	data low_w_flag /.FALSE./	!Assume high W kinematics to start
@@ -117,10 +118,9 @@ c     >		targ%Mtar_struck/1000.,which_pion)
 CDG Change default to PARAM04 - this works better at larger Q2
 c	ntup%sigcm1 = sig_param04(thetacm,phicm,main%t/1.e6,vertex%q2/1.e6,s/1.e6,main%epsilon,
 c     >		targ%Mtar_struck/1000.,which_pion)
-
 CDG Change default to PARAM3000 - this works better at larger Q2
-c	ntup%sigcm1 = sig_param_3000(thetacm,phicm,main%t/1.e6,vertex%q2/1.e6,s/1.e6,main%epsilon,
-c     >		targ%Mtar_struck/1000.,which_pion)
+	ntup%sigcm1 = sig_param_3000(thetacm,phicm,main%t/1.e6,vertex%q2/1.e6,s/1.e6,main%epsilon,
+     >		targ%Mtar_struck/1000.,which_pion)
 
 CDG Use Peter Bosted's new fit to world, JLab 6 GeV, and preliminary 12 GeV data 
 	ntup%sigcm1 = sig_param_2021(thetacm,phicm,main%t/1.e6,vertex%q2/1.e6,s/1.e6,main%epsilon,
@@ -457,7 +457,7 @@ C				  7:-----S1+
 * HPB: factor 15.333 therefore is value of (W**2-mp**2)**2 at W=2.19
 
 	  sig=sig219*15.333/(s_gev-mtar_gev**2)**2
-	  sig=sig/2./pi/1.d+06   !dsig/dtdphicm in microbarns/MeV**2/rad
+	  sig=sig/2./pi/1.e+06   !dsig/dtdphicm in microbarns/MeV**2/rad
 
 	  sig_blok = sig
 
@@ -500,7 +500,6 @@ CDG For now assume sigL(pi+)=sigL(pi-)
 	   sigtt=sigtt*0.25*(1.+3.*exp(-10.*abs(t)))
 	endif
 
-
 	  sig219=(sigt+eps*sigl+eps*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*eps*(1.+eps))*cos(phicm)*siglt)/1.e0
 
@@ -508,7 +507,7 @@ CDG For now assume sigL(pi+)=sigL(pi-)
 * HPB: factor 15.333 therefore is value of (W**2-mp**2)**2 at W=2.19
 
 	  sig=sig219*8.539/(s_gev-mtar_gev**2)**2
-	  sig=sig/2./pi/1.d+06   !dsig/dtdphicm in microbarns/MeV**2/rad
+	  sig=sig/2./pi/1.e+06   !dsig/dtdphicm in microbarns/MeV**2/rad
 
 	  sig_param04 = sig
 
@@ -565,7 +564,7 @@ CDG For now assume sigL(pi+)=sigL(pi-)
 * HPB: factor 15.333 therefore is value of (W**2-mp**2)**2 at W=2.19
 
 	  sig=sig219*8.539/(s_gev-mtar_gev**2)**2
-	  sig=sig/2.0/pi/1.0d+06   !dsig/dtdphicm in microbarns/MeV**2/rad
+	  sig=sig/2.0/pi/1.0e+06   !dsig/dtdphicm in microbarns/MeV**2/rad
 
 	  sig_param_3000 = sig
 

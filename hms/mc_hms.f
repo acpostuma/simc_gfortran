@@ -252,7 +252,6 @@ c            write(*,*) 'TH - SANITY CHECK',Hcollsuccess,p
 		goto 500
 	     endif
 	  endif			!check on collimator simulation
-
 ! Go to Q1 IN  mag bound.  Drift rather than using COSY matrices
 
 	  if (.not.adrift(spectr,1)) write(6,*) 'Transformation #1 is NOT a drift'

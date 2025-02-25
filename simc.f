@@ -40,7 +40,7 @@
 	real*8 one
 	parameter (one=1.0e0)	!double precision 1 for subroutine calls
 
-	real*8 grnd
+	real*8 grnd,dummy
 	real*8 ang_targ_earm,ang_targ_parm
 	logical restorerndstate
 c 
@@ -84,6 +84,10 @@ c	call hlimit(PawSize)
 	call radc_init
 	if (debug(2)) write(6,*)'sim: done with radc_init'
 
+c gh - ranlux init
+        dummy=grnd()
+        call rluxgo(3,dummy,0,0)
+
 ! ... compute some quantities for a central event
 
 	call calculate_central(central,vertex0)
@@ -91,7 +95,7 @@ c	call hlimit(PawSize)
 	if (debug(2)) write(6,*)'central%sigcc=',central%sigcc
 	if (debug(4)) write(6,*)'sim: at 1'
 
-	targetfac=targ%mass_amu/3.75914d+6/(targ%abundancy/100.)
+	targetfac=targ%mass_amu/3.75914e+6/(targ%abundancy/100.)
      >		*abs(cos(targ%angle))/(targ%thick*1000.)
 	if (debug(4)) write(6,*)'sim: at 2'
 
@@ -331,7 +335,8 @@ cdg	call time (timestring1(11:23))
 
 ! ... update the "contribution" and "slop" limits
 	    call limits_update(main,vertex,orig,recon,doing_deuterium,
-     >		doing_pion,doing_kaon,doing_delta,doing_rho,contrib,slop)
+     >		doing_pion,doing_kaon,doing_eepx,doing_delta,doing_rho,contrib,
+     >          slop)
 
 	  endif ! <success>
 
@@ -385,11 +390,12 @@ c	call time (timestring2(11:23))
 
 ! ... 2-fold to 5-fold.
 	if (doing_deuterium.or.doing_heavy.or.doing_pion.or.doing_kaon
-     >      .or.doing_delta.or.doing_rho .or. doing_semi) then
+     >      .or.doing_eepx.or.doing_delta.or.doing_rho .or. doing_semi
+     >      .or.doing_Xphasespace) then
 	  genvol = genvol * domega_p * (gen%e%E%max-gen%e%E%min)
 	endif
 
-	if (doing_heavy.or.doing_semi) then		!6-fold
+	if (doing_heavy.or.doing_semi.or.doing_Xphasespace) then		!6-fold
 	  genvol = genvol * (gen%p%E%max-gen%p%E%min)	
 	endif
 
@@ -677,13 +683,13 @@ c	include 'histograms.inc'
 	  endif
 	else if (doing_semi) then 
 	   if (doing_semipi) then 
-	      if (targ%A .eq. 1) then 
+	      if (targ%A .eq. 1.) then 
 		 if(doing_hplus) then
 		    write(iun,*) ' ****--------  H(e,e''pi+)X  --------****'
 		 else
 		    write(iun,*) ' ****--------  H(e,e''pi-)X  --------****'
 		 endif
-	      elseif (targ%A .eq. 2) then
+	      elseif (targ%A .eq. 2.) then
 		 if(doing_hplus) then
 		    write(iun,*) ' ****--------  D(e,e''pi+)X  --------****'
 		 else
@@ -693,13 +699,13 @@ c	include 'histograms.inc'
 		 stop 'I don''t have ANY idea what A(e,e''pi)X we''re doing!!!'
 	      endif
 	   else if (doing_semika) then  
-	      if (targ%A .eq. 1) then 
+	      if (targ%A .eq. 1.) then 
 		 if(doing_hplus) then
 		    write(iun,*) ' ****--------  H(e,e''k+)X  --------****'
 		 else
 		    write(iun,*) ' ****--------  H(e,e''k-)X  --------****'
 		 endif
-	      elseif (targ%A .eq. 2) then
+	      elseif (targ%A .eq. 2.) then
 		 if(doing_hplus) then
 		    write(iun,*) ' ****--------  D(e,e''k+)X  --------****'
 		 else
@@ -710,13 +716,82 @@ c	include 'histograms.inc'
 	      endif
 	   else   
 	      stop 'I don''t have ANY idea what A(e,e''x)X we''re doing!!!'
-          endif         
+           endif
+     	else if (doing_Xphasespace) then 
+	   if (targ%A .eq. 1.) then 
+	      write(iun,*) ' ****--------  H(e,e''p)X  --------****'
+	   else if (targ%A .eq. 2.) then
+	      write(iun,*) ' ****--------  D(e,e''p)X  --------****'
+	   else if (targ%A .eq. 3.) then
+	      write(iun,*) ' ****--------  A(e,e''p)X  --------****'
+	   else
+	      stop 'I don''t have ANY idea what (e,e''p)X we''re doing!!!'
+	   endif  
 	else if (doing_rho) then
-	   if (targ%A .eq. 1) then
+	   if (targ%A .eq. 1.) then
 	      write(iun,*) '              ****--------  H(e,e''rho)  --------****'
 	   else
 	      write(iun,*) 'I am not set up for anything else yet!'
 	   endif
+	else if (doing_eepx) then
+	  if (doing_hydeepx) then
+	     if(which_eepx.eq.1) then
+		write(iun,*) '           ****--------  H(e,e''p)gamma  --------****'
+	     elseif(which_eepx.eq.2) then
+		write(iun,*) '           ****--------  H(e,e''p)pi0  --------****'
+	     else if(which_eepx.eq.3) then
+		write(iun,*) '           ****--------  H(e,e''p)eta  --------****'
+	     else if(which_eepx.eq.4) then
+		write(iun,*) '           ****--------  H(e,e''p)rho0  --------****'
+	     else if(which_eepx.eq.5) then
+		write(iun,*) '           ****--------  H(e,e''p)omega  --------****'
+	     else if(which_eepx.eq.6) then
+		write(iun,*) '           ****--------  H(e,e''p)eta_prime  --------****'
+	     else if(which_eepx.eq.7) then
+		write(iun,*) '           ****--------  H(e,e''p)phi  --------****'
+	     else
+		write(iun,*) '           ****--------  H(e,e''p)Mx  --------****'
+		write(iun,*) '               Mx in MeV is', Meepx
+	     endif
+	  else if (doing_deuteepx) then
+	     if(which_eepx.eq.1) then
+		write(iun,*) '           ****--------  D(e,e''p)gamma  --------****'
+	     elseif(which_eepx.eq.2) then
+		write(iun,*) '           ****--------  D(e,e''p)pi0  --------****'
+	     else if(which_eepx.eq.3) then
+		write(iun,*) '           ****--------  D(e,e''p)eta  --------****'
+	     else if(which_eepx.eq.4) then
+		write(iun,*) '           ****--------  D(e,e''p)rho0  --------****'
+	     else if(which_eepx.eq.5) then
+		write(iun,*) '           ****--------  D(e,e''p)omega  --------****'
+	     else if(which_eepx.eq.6) then
+		write(iun,*) '           ****--------  D(e,e''p)eta_prime  --------****'
+	     else if(which_eepx.eq.7) then
+		write(iun,*) '           ****--------  D(e,e''p)phi  --------****'
+	     else
+		write(iun,*) '           ****--------  D(e,e''p)Mx  --------****'
+		write(iun,*) '               Mx in MeV is', Meepx
+	     endif
+	  else if (doing_heeepx) then
+	     if(which_eepx.eq.1) then
+		write(iun,*) '           ****--------  A(e,e''p)gamma  --------****'
+	     elseif(which_eepx.eq.2) then
+		write(iun,*) '           ****--------  A(e,e''p)pi0  --------****'
+	     else if(which_eepx.eq.3) then
+		write(iun,*) '           ****--------  A(e,e''p)eta  --------****'
+	     else if(which_eepx.eq.4) then
+		write(iun,*) '           ****--------  A(e,e''p)rho0  --------****'
+	     else if(which_eepx.eq.5) then
+		write(iun,*) '           ****--------  A(e,e''p)omega  --------****'
+	     else if(which_eepx.eq.6) then
+		write(iun,*) '           ****--------  A(e,e''p)eta_prime  --------****'
+	     else if(which_eepx.eq.7) then
+		write(iun,*) '           ****--------  A(e,e''p)phi  --------****'
+	     else
+		write(iun,*) '           ****--------  A(e,e''p)Mx  --------****'
+		write(iun,*) '           where Mx in MeV is', Meepx
+	     endif
+	  endif
 	else if (doing_delta) then
 	  if (doing_hyddelta) then
 	    write(6,*) ' ****--------  H(e,e''p)pi  --------****'
@@ -729,9 +804,9 @@ c	include 'histograms.inc'
 	  endif
 	else if (doing_pion) then
 	  if (doing_hydpi) then
-	    if (targ%A .eq. 1) then
+	    if (targ%A .eq. 1.) then
 	      write(iun,*) '              ****--------  H(e,e''pi)  --------****'
-	    else if (targ%A .ge.3) then
+	    else if (targ%A .ge.3.) then
 	      write(iun,*) '              ****--------  A(e,e''pi)  --------****'
 	    endif
 	  else if (doing_deutpi) then
@@ -750,9 +825,9 @@ c	include 'histograms.inc'
 	  endif
 	else if (doing_kaon) then
 	  if (doing_hydkaon) then
-	    if (targ%A .eq. 1) then
+	    if (targ%A .eq. 1.) then
 	      write(iun,*) '              ****--------  H(e,e''K)  --------****'
-	    else if (targ%A .ge.3) then
+	    else if (targ%A .ge.3.) then
 	      write(iun,*) '              ****--------  A(e,e''K)  --------****'
 	    endif
 	  else if (doing_deutkaon) then
@@ -875,7 +950,8 @@ c	include 'histograms.inc'
 	write(iun,'(5x,2(2x,a19,''='',l2))') 'doing_delta',doing_delta,
      >		'doing_phsp', doing_phsp
 	write(iun,'(5x,3(2x,a19,''='',i2))') 'which_pion', which_pion,
-     >		'which_kaon', which_kaon, 'pizero_ngamma',pizero_ngamma
+     >		'which_kaon', which_kaon, 'pizero_ngamma',pizero_ngamma,
+                'which_eepx',which_eepx
 	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hyd_elast', doing_hyd_elast,
      >		'doing_deuterium', doing_deuterium, 'doing_heavy', doing_heavy
 	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hydpi', doing_hydpi,
@@ -886,11 +962,15 @@ c	include 'histograms.inc'
      >          'doing_deutsemi', doing_deutsemi, 'do_fermi', do_fermi
 	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hydrho', doing_hydrho,
      >          'doing_deutrho', doing_deutrho, 'doing_herho', doing_herho
+	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hydeepx', doing_hydeepx,
+     >          'doing_deuteepx', doing_deuteepx, 'doing_heeepx', doing_heeepx
+	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hydXphase', doing_hydXphase,
+     >          'doing_deutXphase', doing_deutXphase, 'doing_heXphase', doing_heXphase
 	write(iun,'(5x,(2x,a19,''='',l2),2(2x,a19,''='',i2))') 'mc_smear',
      >		mc_smear,'electron_arm',electron_arm,'hadron_arm',hadron_arm
-	write(iun,'(5x,3(2x,a19,''='',l2)))') 'using_Eloss', using_Eloss,
+	write(iun,'(5x,3(2x,a19,''='',l2))') 'using_Eloss', using_Eloss,
      >		'using_Coulomb',using_Coulomb,'deForest_flag',deForest_flag
-	write(iun,'(5x,3(2x,a19,''='',l2)))') 'correct_Eloss', correct_Eloss,
+	write(iun,'(5x,3(2x,a19,''='',l2))') 'correct_Eloss', correct_Eloss,
      >		'correct_raster',correct_raster, 'doing_decay', doing_decay
 	write(iun,'(5x,3(2x,a19,''='',l2))') 
      >		'using_E_arm_montecarlo', using_E_arm_montecarlo,
@@ -899,7 +979,7 @@ c	include 'histograms.inc'
 	if (electron_arm.eq.5 .or. hadron_arm.eq.5 .or.
      >	    electron_arm.eq.6 .or. hadron_arm.eq.6)
      >	    write(iun,'(7x,a19,''='',l2)') 'use_first_cer',use_first_cer
-	write(iun,'(7x,a11,''='',f10.3,a4)') 'ctau',ctau,'cm'
+	write(iun,'(7x,2(a11,''='',f10.3,a4))') 'ctau',ctau,'cm','Meepx',Meepx,'MeV'
 	if (use_benhar_sf)
      >      write(iun,'(7x,a12,''='',f8.4)') 'transparency',transparency
 ! Counters
@@ -1037,7 +1117,8 @@ c	include 'histograms.inc'
      >      contrib%vertex%Em%lo, contrib%vertex%Em%hi, 'MeV'
 	write(iun,9917) 'Pm', VERTEXedge%Pm%min, VERTEXedge%Pm%max,
      >       contrib%vertex%Pm%lo, contrib%vertex%Pm%hi, 'MeV/c'
-	if ((doing_deuterium .or. doing_pion .or. doing_kaon .or. doing_delta) .and. using_rad) then
+	if ((doing_deuterium .or. doing_pion .or. doing_kaon .or. 
+     >       doing_eepx .or. doing_delta) .and. using_rad) then
 	   write(iun,*) '      *** NOTE: sumEgen.min only used in GENERATE_RAD'
 	endif
 
@@ -1738,9 +1819,11 @@ C	  recon%p%delta = (recon%p%P-spec%p%P)/spec%p%P*100.
      >          using_SHMScoll)
 	  else if (electron_arm.eq.7 .or. electron_arm .eq. 8) then
              if (abs(spec%p%phi-pi/2) .eq. 10.) then
-	     zhadron = -recon%p%z*(cos(spec%p%theta)/tan(spec%p%theta+recon%p%yptar)+sin(spec%p%theta)) ! recon.p.z is really ytgt
+	     zhadron = -recon%p%z*(cos(spec%p%theta)
+     >            /tan(spec%p%theta+recon%p%yptar)+sin(spec%p%theta)) ! recon.p.z is really ytgt
 	     else
-	     zhadron = recon%p%z*(cos(spec%p%theta)/tan(spec%p%theta-recon%p%yptar)+sin(spec%p%theta))
+	     zhadron = recon%p%z*(cos(spec%p%theta)
+     >            /tan(spec%p%theta-recon%p%yptar)+sin(spec%p%theta))
 	     endif
 	    call mc_calo(spec%e%p, spec%e%theta, delta_e_arm, x_e_arm,
      >		y_e_arm, z_e_arm, dx_e_arm, dy_e_arm, xfp, dxfp, yfp, dyfp,
