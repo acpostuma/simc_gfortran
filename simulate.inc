@@ -150,7 +150,7 @@ C	real*8 decdist(30)
 	logical doing_hydeepx, doing_deuteepx, doing_heeepx
 	logical doing_hyddelta, doing_deutdelta, doing_hedelta
 	logical doing_hydrho, doing_Deutrho, doing_herho
-	logical doing_hydsemi, doing_deutsemi
+	logical doing_hydsemi, doing_hesemi, doing_deutsemi
 	logical doing_hydXphase, doing_deutXphase, doing_heXphase
 
 	common /decd/ ctau,doing_decay,
@@ -159,7 +159,7 @@ C	real*8 decdist(30)
      >    doing_hydeepx,doing_deuteepx,doing_heeepx,
      >    doing_hyddelta,doing_deutdelta,doing_hedelta,
      >    doing_hydrho, doing_deutrho, doing_herho,
-     >    doing_hydsemi, doing_deutsemi,
+     >    doing_hydsemi, doing_hesemi, doing_deutsemi,
      >    doing_hydXphase, doing_deutXphase, doing_heXphase
 
 C Trying to get rid of the decdist array of random variables.
