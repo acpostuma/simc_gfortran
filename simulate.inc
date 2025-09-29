@@ -60,7 +60,7 @@
 	logical debug(6)
 	integer*4 nevent, ntried, ngen, deForest_flag, Nntu
 	integer*4 ncontribute, npasscuts, ncontribute_no_rad_proton, spect_mode, phsp_mode
-	character base*40
+	character base*50
 	character extra_dbase_file*60
 	character tgt_field_file*60
 	logical using_E_arm_montecarlo, using_P_arm_montecarlo

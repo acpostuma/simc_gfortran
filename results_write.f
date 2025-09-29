@@ -216,7 +216,7 @@ c	  ntu(50) = pfer/1000.*dummy			!p_fermi along q.
 	  ntu(42) = decdist				!decay distance (cm)
 	  ntu(43) = sqrt(Mh2_final)
 	  ntu(44) = recon%zhad
-	  ntu(45) = vertex%zhad
+ 	  ntu(45) = vertex%zhad
 	  ntu(46) = recon%pt2/1.e06
 	  ntu(47) = vertex%pt2/1.e06
 	  ntu(48) = recon%xbj
@@ -246,6 +246,7 @@ c	  ntu(50) = pfer/1000.*dummy			!p_fermi along q.
 	     if(doing_rho) then
 		ntu(57) = ntup%rhomass
 		ntu(58) = ntup%rhotheta
+		ntu(59) = ntup%mmA/1000.			!missmass (nucleus)HSV
 	     endif
 	  endif
 	  if(doing_pizero) then
@@ -274,6 +275,9 @@ c	  ntu(50) = pfer/1000.*dummy			!p_fermi along q.
 	  ntu(42) = ntup%radphot/1000.			!radphot - GeV
 	  ntu(43) = main%sigcc
 	  ntu(44) = main%weight
+	  ntu(45) = recon%e%theta
+	  ntu(46) = recon%p%theta
+	  
 	endif
 
 c	call HFN(NtupleID,ntu)

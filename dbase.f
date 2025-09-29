@@ -211,6 +211,7 @@ C DJG:
 	   endif
 	   doing_hydsemi = (nint(targ%A).eq.1)
 	   doing_deutsemi = (nint(targ%A).eq.2)
+	   doing_hesemi = (nint(targ%A).ge.3)
 	   if(doing_hydsemi.and.do_fermi) then
 	      write(6,*) 'WARNING: Cannot do Fermi motion for Hydrogen!'
 	      write(6,*) 'Do you mean to be running deuterium?'
@@ -371,10 +372,10 @@ C DJG:
 	   targ%Mtar_struck = Mp
 	   targ%Mrec_struck = Mp    !must have at LEAST a recoiling proton
 	                            !Probably more...
-	   if(doing_deutsemi) then
-	      targ%Mtar_struck = (Mp+Mn)/2.0
-	      targ%Mrec_struck = (Mp+Mn)/2.0
-	   endif
+c	   if(doing_deutsemi.or.doing_hesemi) then
+c	      targ%Mtar_struck = (Mp+Mn)/2.0
+c	      targ%Mrec_struck = (Mp+Mn)/2.0
+c	   endif
 	   if(doing_hplus) then
 	      sign_hadron=1.0
 	   else
@@ -812,6 +813,23 @@ C DJG:
 		       write(6,*) ' ****--------  D(e,e''pi-)X  --------****'
 		    endif
 		 endif
+	      elseif (doing_hesemi) then
+		 if(doing_pizero) then
+		    write(6,*) ' ****--------  A(e,e''pi0)X  --------****'
+		    if(pizero_ngamma.eq.1) then
+		       write(6,*) 'Requiring only one photon from decaying pi0'
+		    elseif(pizero_ngamma.eq.2) then
+		       write(6,*) 'Requiring both photons from decaying pi0'
+		    else
+		       stop 'pizero_ngamma not set correctly(must be 1 or 2), stopping'
+		    endif
+		 else
+		    if(doing_hplus) then
+		       write(6,*) ' ****--------  A(e,e''pi+)X  --------****'
+		    else
+		       write(6,*) ' ****--------  A(e,e''pi-)X  --------****'
+		    endif
+		 endif
 	      endif
 	      
 	   else if (doing_semika) then
@@ -826,6 +844,12 @@ C DJG:
 		    write(6,*) ' ****--------  D(e,e''K+)X  --------****'
 		 else
 		    write(6,*) ' ****--------  D(e,e''K-)X  --------****'
+		 endif
+	      elseif(doing_hesemi) then
+		 if(doing_hplus) then
+		    write(6,*) ' ****--------  A(e,e''K+)X  --------****'
+		 else
+		    write(6,*) ' ****--------  A(e,e''K-)X  --------****'
 		 endif
 	      endif
 	   else  
@@ -1076,8 +1100,10 @@ c	      stop
 	if (.not.using_P_arm_montecarlo) write(6,*) 'NOTE: Will NOT be running events through the P arm Monte Carlo'
 	if (.not.using_Eloss) write(6,*) 'NOTE: Will NOT be calculating energy loss in the target'
 	if (.not.using_Coulomb) write(6,*) 'NOTE: Will NOT be calculating Coulomb correction (default for Hydrogen target)'
-	if (using_Coulomb) write(6,*) 'NOTE: WILL be calculating Coulomb corrections. 
-     >             Implmemented for beam and scattered electron only!'
+	if (using_Coulomb) then
+	   write(6,*) 'NOTE: WILL be calculating Coulomb corrections.'  
+	   write(6,*) 'Implmemented for beam and scattered electron only !'
+	endif
 	if (.not.correct_Eloss) write(6,*) 'NOTE: Will NOT correct reconstructed data for energy loss'
 	if (.not.correct_raster) write(6,*) 'NOTE: Will NOT use raster terms in reconstruction'
 	if (using_HMScoll) write(6,*) 'NOTE: including pion scattering in HMS collimator'
