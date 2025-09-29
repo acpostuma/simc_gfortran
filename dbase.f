@@ -1150,19 +1150,19 @@ c	      stop
 	ierr = regparmint('which_kaon',which_kaon,0)
 	ierr = regparmint('doing_pion',doing_pion_int,0)
 	ierr = regparmint('which_pion',which_pion,0)
-	ierr = regparmint('doing_eepx',doing_eepx,0)
+	ierr = regparmint('doing_eepx',doing_eepx_int,0)
 	ierr = regparmint('doing_delta',doing_delta_int,0)
 	ierr = regparmint('doing_fileinput',doing_fileinput_int,0)
 	ierr = regparmint('doing_semi', doing_semi_int,0)
 	ierr = regparmint('doing_hplus', doing_hplus_int,1)
-	ierr = regparmint('doing_rho',doing_rho,0)
+	ierr = regparmint('doing_rho',doing_rho_int,0)
 	ierr = regparmint('doing_pizero', doing_pizero_int,0)
 	ierr = regparmint('pizero_ngamma', pizero_ngamma,0)
 	ierr = regparmint('doing_rho',doing_rho_int,0)
-	ierr = regparmint('doing_Xphasespace',doing_Xphasespace,0)
+	ierr = regparmint('doing_Xphasespace',doing_Xphasespace_int,0)
 	ierr = regparmint('doing_decay',doing_decay_int,0)
 	ierr = regparmdouble('ctau',ctau,0.0)
-	ierr = regparmdouble('Meepx',Meepx,0)
+	ierr = regparmdouble('Meepx',Meepx,0.0)
 
 *	DEBUG
 
@@ -1301,6 +1301,8 @@ ccc
 	if(doing_pizero_int.gt.0) doing_pizero=.true.
         if(doing_rho_int.gt.0) doing_rho=.true.
         if(doing_decay_int.gt.0) doing_decay=.true.
+        if(doing_eepx_int.gt.0) doing_eepx=.true.
+        if(doing_Xphasespace_int.gt.0) doing_Xphasespace=.true.
         if(do_fermi_int.gt.0) do_fermi=.true.
 	do i=1,6
 	   if(debug_int(i).gt.0) debug(i)=.true.

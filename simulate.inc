@@ -84,6 +84,7 @@
 c variables that need to be translated from integer to logical
   	integer*4 mc_smear_int, use_benhar_sf_int,doing_kaon_int, doing_pion_int,doing_delta_int,doing_fileinput_int,doing_phsp_int
 	integer*4 doing_semi_int,doing_hplus_int,doing_pizero_int,doing_rho_int,doing_decay_int,do_fermi_int
+	integer*4 doing_eepx_int,doing_Xphasespace_int
 	integer*4 debug_int(6)
 	integer*4 hard_cuts_int,using_rad_int,use_offshell_rad_int
 	integer*4 using_Eloss_int,correct_eloss_int,correct_raster_int,using_cit_generation_int
@@ -108,8 +109,8 @@ c variables that need to be translated from integer to logical
      >    transparency, use_benhar_sf,start_random_state_file,
      >    random_state_file, random_seed,
      >    mc_smear_int, use_benhar_sf_int,doing_kaon_int, doing_pion_int,doing_delta_int,doing_fileinput_int,doing_phsp_int,
-     >    doing_semi_int,doing_hplus_int,doing_pizero_int,doing_rho_int,doing_decay_int,do_fermi_int,
-     >    debug_int,hard_cuts_int,using_rad_int,use_offshell_rad_int,
+     >    doing_semi_int,doing_hplus_int,doing_pizero_int,doing_rho_int,doing_decay_int,do_fermi_int,doing_eepx_int,
+     >    debug_int,hard_cuts_int,using_rad_int,use_offshell_rad_int,doing_Xphasespace_int,
      >    using_Eloss_int,correct_eloss_int,correct_raster_int,using_cit_generation_int,
      >    using_Coulomb_int, using_tgt_field_int, using_HMScoll_int, using_SHMScoll_int
 
