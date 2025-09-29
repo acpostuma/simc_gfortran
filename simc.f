@@ -43,6 +43,9 @@
 	real*8 grnd,dummy
 	real*8 ang_targ_earm,ang_targ_parm
 	logical restorerndstate
+c
+      logical end_of_input_file
+      common /eventfile/ end_of_input_file
 c 
 
 ! INITIALIZE
@@ -52,6 +55,7 @@ c
 ! ... no longer do it in the * include file
 	call min_max_init(contrib)
 
+	write(6,*)'sim: calling min_max_init'
 	
 
 C DJG Remove cernlib requirements July, 2020
@@ -87,6 +91,7 @@ c	call hlimit(PawSize)
 c gh - ranlux init
         dummy=grnd()
         call rluxgo(3,dummy,0,0)
+c Alicia: try removing this, seems to break SIMC
 
 ! ... compute some quantities for a central event
 
@@ -169,7 +174,6 @@ cdg	call time (timestring1(11:23))
 	nevent = 0
 	ninform = 1000
 	sum_sigcc = 0.0	!sum of main.sigcc (for generating ave sigcc)
-
 	do while (nevent.lt.abs(ngen))
 
 ! reset decay distance, initial hadron mass (modified if particle decays),
@@ -208,6 +212,8 @@ cdg	call time (timestring1(11:23))
 ! ... generate an event
 	  call generate(main,vertex,orig,success)
 	  if(debug(2)) write(6,*)'sim: after gen, success =',success
+          if(doing_fileinput .and. end_of_input_file) nevent = abs(ngen)+1
+          if(end_of_input_file) success = .false.
 
 ! Run the event through various manipulations, checking to see whether
 ! it made it at each stage
@@ -678,6 +684,8 @@ c	include 'histograms.inc'
 	    write(iun,*) '              ****--------  D(e,e''p)  --------****'
 	  else if (doing_heavy) then
 	    write(iun,*) '              ****--------  A(e,e''p)  --------****'
+	  else if (doing_fileinput) then
+	    write(iun,*) '              ****--------  Reading from file  --------****'
 	  else
 	    stop 'I don''t have ANY idea what (e,e''p) we''re doing!!!'
 	  endif
@@ -949,9 +957,9 @@ c	include 'histograms.inc'
      >		'doing_semika', doing_semika, 'doing_pizero',doing_pizero
 	write(iun,'(5x,2(2x,a19,''='',l2))') 'doing_delta',doing_delta,
      >		'doing_phsp', doing_phsp
-	write(iun,'(5x,3(2x,a19,''='',i2))') 'which_pion', which_pion,
+	write(iun,'(5x,3(2x,a19,''='',l2))') 'which_pion', which_pion,
      >		'which_kaon', which_kaon, 'pizero_ngamma',pizero_ngamma,
-                'which_eepx',which_eepx
+     >          'which_eepx', which_eepx
 	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hyd_elast', doing_hyd_elast,
      >		'doing_deuterium', doing_deuterium, 'doing_heavy', doing_heavy
 	write(iun,'(5x,3(2x,a19,''='',l2))') 'doing_hydpi', doing_hydpi,
@@ -1379,7 +1387,6 @@ c	enddo
 	include 'simulate.inc'
 
 * Track-coordinate and spectrometer common blocks
-
 	real*8 x_E_arm,y_E_arm,z_E_arm,dx_E_arm,dy_E_arm,delta_E_arm
 	real*8 x_P_arm,y_P_arm,z_P_arm,dx_P_arm,dy_P_arm,delta_P_arm
 	real*8 xtar_init_P, xtar_init_E
@@ -1452,7 +1459,6 @@ c	enddo
 	endif
 
 ! ... multiple scattering
-
 	if (mc_smear) then
 	  beta = orig%p%p/orig%p%E
 	  call target_musc(orig%p%p, beta, main%target%teff(3), dangles)
@@ -1654,6 +1660,7 @@ C DJG For spectrometers to the left of the beamline, need to pass ctheta,-stheta
 
 	  if (.not.ok_P_arm) then
 	     if (debug(3)) write(6,*)'mc: ok_P_arm =',ok_P_arm
+C             write(6,*) "Not ok P arm"
 	     return
 	  endif
 

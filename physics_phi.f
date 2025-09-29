@@ -3,6 +3,7 @@
 c     gh - 14.12.18
 c     gh - modified 17.12.27
       
+      USE structureModule
       implicit none
       include 'simulate.inc'
 

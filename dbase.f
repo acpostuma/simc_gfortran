@@ -3,7 +3,8 @@
 ! dbase_read reads the input file and sets the run-time flags for the run.
 ! Note that there are four INDEPENDENT ways to run SIMC.
 !
-! 1. doing_eep: (e,e'p) subcases:doing_hyd_elast, doing_deuterium, doing_heavy
+! 1. doing_eep: (e,e'p) subcases:doing_hyd_elast, doing_deuterium,
+! doing_heavy, doing_fileinput
 !
 ! 2. doing_kaon:(e,e'K) subcases:doing_hydkaon, doing_deutkaon,doing_hekaon.
 !	which_kaon= 0/ 1/ 2 for Lambda/Sigam0/Sigma- quasifree.
@@ -237,6 +238,9 @@ C DJG:
 	  doing_hyd_elast = (nint(targ%A).eq.1)
 	  doing_deuterium = (nint(targ%A).eq.2)
 	  doing_heavy = (nint(targ%A).ge.3)
+          if (doing_fileinput) then
+                  doing_hyd_elast = .false.
+          endif 
 	endif
 
 	Mh2 = Mh*Mh
@@ -766,6 +770,8 @@ C DJG:
 	    write(6,*) ' ****--------  D(e,e''p)  --------****'
 	  else if (doing_heavy) then
 	    write(6,*) ' ****--------  A(e,e''p)  --------****'
+	  else if (doing_fileinput) then
+	    write(6,*) ' ****--------  Event file input  --------****'
 	  else
 	    stop 'I don''t have ANY idea what (e,e''p) we''re doing!!!'
 	  endif
@@ -1120,6 +1126,7 @@ c	      stop
 	ierr = regparmint('which_pion',which_pion,0)
 	ierr = regparmint('doing_eepx',doing_eepx,0)
 	ierr = regparmint('doing_delta',doing_delta_int,0)
+	ierr = regparmint('doing_fileinput',doing_fileinput_int,0)
 	ierr = regparmint('doing_semi', doing_semi_int,0)
 	ierr = regparmint('doing_hplus', doing_hplus_int,1)
 	ierr = regparmint('doing_rho',doing_rho,0)
@@ -1261,6 +1268,7 @@ ccc
         if(doing_kaon_int.gt.0) doing_kaon=.true. 
 	if(doing_pion_int.gt.0) doing_pion=.true.
 	if(doing_delta_int.gt.0) doing_delta=.true.
+	if(doing_fileinput_int.gt.0) doing_fileinput=.true.
 	if(doing_phsp_int.gt.0) doing_phsp=.true.
 	if(doing_semi_int.gt.0) doing_semi=.true.
         if(doing_hplus_int.gt.0) doing_hplus=.true.

@@ -3,6 +3,7 @@
 C     This function is adapted from Pawel Ambrozewicz
 C     noted by xucc
 
+      USE structureModule
       implicit none
       include 'simulate.inc'
 
@@ -211,6 +212,7 @@ C DJG  Breit-Wigner in the event generation - not needed here anymore.
 * Jacobian for fixed Mx.  Ep is a function of theta_pq.
 * J=dt/dcos_LAB [MeV^2].
       Jttheta_fx = 2.*m_p*qvec*Pp / ( m_p+nu-qvec*Ep/Pp*tcos )
+         write(6,*)' Mrho=',Mrho,' BW=',Breit_wigner, 'Jttheta_mx', Jttheta_fx
 
 * Jacobian for varying Mx.   Ep and theta_pq are independent since they
 * are sampled separately. 

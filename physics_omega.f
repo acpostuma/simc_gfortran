@@ -4,7 +4,8 @@ C     This function is adapted from Pawel Ambrozewicz
 C     noted by xucc
 c     checked and modifed by gh - 05.02.11
 c     new version incorporating W.Li's thesis work - 17.12.27      
-
+      
+      USE structureModule
       implicit none
       include 'simulate.inc'
 

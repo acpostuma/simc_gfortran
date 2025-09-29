@@ -29,7 +29,7 @@ OBJ2	= radc.o init.o dbase.o physics_kaon.o physics_pion.o physics_delta.o physi
 OBJ3    = semi_physics.o rho_physics.o rho_decay.o generate_rho.o trg_track.o semi_dilution.o pizero_decay.o
 OBJ3a	= physics_omega.o physics_Xphasespace.o physics_rho_recoil.o physics_phi.o
 OBJ3b   = physics_eta.o physics_eta_prime.o physics_pizero.o physics_dvcs.o
-OBJ4	= results_write.o event.o call_ranlux.o jacobians.o F1F2IN21_v1.0.o
+OBJ4	= results_write.o event.o call_ranlux.o jacobians.o get_file_event.o F1F2IN21_v1.0.o
 OBJ5	= $(A)musc.o $(A)musc_ext.o $(A)project.o $(A)transp.o
 OBJ6	= $(A)rotate_haxis.o $(A)rotate_vaxis.o $(A)locforunt.o
 OBJ7	= $(H)mc_hms.o $(H)mc_hms_hut.o $(H)mc_hms_recon.o $(H)pion_coll_absorb.o $(H)mc_hms_coll.o
@@ -45,6 +45,7 @@ OBJF   = $(D)fdss.o
 MODULES	= modules.f histograms_module.f
 
 my_objs	=  $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ3a) $(OBJ3b) $(OBJ4) $(OBJ5) $(OBJ6) $(OBJ7) $(OBJ8) $(OBJ9) $(OBJA) $(OBJB) $(OBJC) $(OBJD) $(OBJCH) $(OBJF)
+#my_objs	=  $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4) $(OBJ5) $(OBJ6) $(OBJ7) $(OBJ8) $(OBJ9) $(OBJA) $(OBJB) $(OBJC) $(OBJD) $(OBJCH) $(OBJF)
 my_deps = $(my_objs:.o=.d)
 
 MYOS := $(subst -,,$(shell uname))

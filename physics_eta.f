@@ -2,6 +2,7 @@
 
 C     first version written by Wenliang Li, 2017
 
+      USE structureModule
       implicit none
       include 'simulate.inc'
 

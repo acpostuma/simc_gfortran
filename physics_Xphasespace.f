@@ -3,6 +3,7 @@
 C     This function is adapted from Pawel Ambrozewicz
 C     noted by xucc
 
+      USE structureModule
       implicit none
       include 'simulate.inc'
 
@@ -128,6 +129,7 @@ c     main%t =tt
 *  here ntup.sigcm=d3sigma/dOmega_cm/dMx   [ub/MeV/sr]
 ******************************************************************************
 * Equation 3.27 from Pawel's thesis
+* ACP: will have to modify for any 12 GeV analysis
 
       ntup%sigcm = 1./(32.*pi*pi)*mass/q_photCM*p_cm/invm**2
 

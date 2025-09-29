@@ -139,14 +139,15 @@ c	include 'structures.inc'
 	real*8 m_spec		!spectator (A-1) mass based on missing energy
 	real*8 gauss1
 	logical success
-	real*8 grnd,rannum	!random # generator.
+	real*8 grnd	!random # generator.
+	real*8 rannum	!random # generator.
 	real*4 rannum4
 	type(event_main):: main
 	type(event):: vertex, orig
 
 	real*8 nsig_max
 	parameter(nsig_max=3.0e0)      !max #/sigma for gaussian ran #s.
-
+	logical ok_fileinput
 
 ! Randomize the position of the interaction inside the available region.
 ! gen.xwid and gen.ywid are the intrinsic beam widths (one sigma value).
@@ -278,31 +279,20 @@ C modified 5/15/06 for poinct
 ! energy.  There is a jacobian ( |dEp'/dEm| ).  It comes from integrating
 ! over the energy conservation delta function: delta(E_D - E_p - E_n - Em).
 
+
+
+
 ! Generate Electron Angles (all cases):
-c ranlux substituted for grnd - gh
-        call ranlux (rannum4,1)
-        rannum=dble(rannum4)
-        vertex%e%yptar=gen%e%yptar%min+rannum*(gen%e%yptar%max-gen%e%yptar%min)
-c	vertex%e%yptar=gen%e%yptar%min+grnd()*(gen%e%yptar%max-gen%e%yptar%min)
-        call ranlux (rannum4,1)
-        rannum=dble(rannum4)
-        vertex%e%xptar=gen%e%xptar%min+rannum*(gen%e%xptar%max-gen%e%xptar%min)
-c	vertex%e%xptar=gen%e%xptar%min+grnd()*(gen%e%xptar%max-gen%e%xptar%min)
+	vertex%e%yptar=gen%e%yptar%min+grnd()*(gen%e%yptar%max-gen%e%yptar%min)
+	vertex%e%xptar=gen%e%xptar%min+grnd()*(gen%e%xptar%max-gen%e%xptar%min)
 
 ! Generate Hadron Angles (all but H(e,e'p)):
 	if (doing_deuterium.or.doing_heavy.or.doing_pion.or.doing_kaon
      >         .or.doing_eepx.or.doing_delta.or.doing_semi
      >         .or.doing_Xphasespace) then
-c ranlux substituted for grnd - gh
-          call ranlux (rannum4,1)
-          rannum=dble(rannum4)
-          vertex%p%yptar=gen%p%yptar%min+rannum*
-c	  vertex%p%yptar=gen%p%yptar%min+grnd()*
+	  vertex%p%yptar=gen%p%yptar%min+grnd()*
      >  	(gen%p%yptar%max-gen%p%yptar%min)
-          call ranlux (rannum4,1)
-          rannum=dble(rannum4)
-          vertex%p%xptar=gen%p%xptar%min+rannum*
-c	  vertex%p%xptar=gen%p%xptar%min+grnd()*
+	  vertex%p%xptar=gen%p%xptar%min+grnd()*
      >          (gen%p%xptar%max-gen%p%xptar%min)
 	endif
 
@@ -312,11 +302,7 @@ c	  vertex%p%xptar=gen%p%xptar%min+grnd()*
 	  Emax = min(gen%p%E%max, gen%sumEgen%max - gen%e%E%min)
 	  if (Emin.gt.Emax) goto 100
 	  main%gen_weight=main%gen_weight*(Emax-Emin)/(gen%p%E%max-gen%p%E%min)
-c ranlux substituted for grnd - gh
-          call ranlux (rannum4,1)
-          rannum=dble(rannum4)
-          vertex%p%E = Emin + rannum*(Emax-Emin)
-c	  vertex%p%E = Emin + grnd()*(Emax-Emin)
+	  vertex%p%E = Emin + grnd()*(Emax-Emin)
           vertex%p%P = sqrt(vertex%p%E**2 - Mh2)
 	  vertex%p%delta = 100.*(vertex%p%P-spec%p%P)/spec%p%P
 	endif
@@ -337,14 +323,34 @@ c	  vertex%p%E = Emin + grnd()*(Emax-Emin)
 	  endif
 	  if (Emin.gt.Emax) goto 100
 	  main%gen_weight=main%gen_weight*(Emax-Emin)/(gen%e%E%max-gen%e%E%min)
-c ranlux substituted for grnd - gh
-          call ranlux (rannum4,1)
-          rannum=dble(rannum4)
-          vertex%e%E = Emin + rannum*(Emax-Emin)
-c	  vertex%e%E = Emin + grnd()*(Emax-Emin)
+	  vertex%e%E = Emin + grnd()*(Emax-Emin)
           vertex%e%P = vertex%e%E
           vertex%e%delta = 100.*(vertex%e%P-spec%e%P)/spec%e%P
 	endif	!not (doing_hyd_elast)
+             
+
+c        write(6,*) main%target%x, main%target%y, main%target%z
+c        write(6,*) vertex%e%xptar, vertex%e%yptar, vertex%e%p
+c        write(6,*) vertex%p%xptar, vertex%p%yptar, vertex%p%p
+!
+! ACP adding from simc-file-input 
+! if input file exists, use it instead
+        if (doing_fileinput) then
+             ok_fileinput = .true.
+             call get_file_event(electron_arm,spec%e%theta,spec%p%theta,
+     >         vertex%e%xptar,vertex%e%yptar,vertex%e%p,vertex%e%E,
+     >         vertex%p%xptar,vertex%p%yptar,vertex%p%p,vertex%p%E,
+     >         main%target%z, targ%zoffset, main%gen_weight)
+c             write(6,*) "After get_file_event"
+c             write(6,*) main%target%x, main%target%y, main%target%z
+c             write(6,*) vertex%e%xptar, vertex%e%yptar, vertex%e%p
+c             write(6,*) vertex%p%xptar, vertex%p%yptar, vertex%p%p
+c             write(*,"(f10.4)")main%gen_weight, vertex%e%p
+                if ( .not. ok_fileinput) goto 100
+                vertex%e%delta = 100.*(vertex%e%P - spec%e%P)/spec%e%P
+                vertex%p%delta = 100.*(vertex%p%P - spec%p%P)/spec%p%P
+        endif
+
 
 
 ! Calculate the electron and proton PHYSICS angles from the spectrometer angles.
@@ -480,7 +486,7 @@ C DJG spectrometer
 	real*8 diffmin
 	real*8 w,w2,prob,probtot,probsum(1000),mass_save(1000)
 	real*8 Ehad2,E_rec
-	real*8 grnd,rn		!random # generator.
+	real*8 grnd,rannum		!random # generator.
 	real*8 v1(4), Mgamma, costh, phi,mchk
 	real*8 pmx,pmy,pmz,pm,em
 	real*4 rannum4
@@ -560,7 +566,8 @@ c PB: from resmod507 in first call to semi_physics.f
 
 ! The q vector
 
-	if (debug(5)) write(6,*)'comp_ev: Ein,E,uez=',vertex%Ein,vertex%e%E,vertex%ue%z
+	if (debug(5)) write(6,*)'comp_ev:Ein,E',vertex%Ein,vertex%e%E
+	if (debug(5)) write(6,*)'comp_ev:uex,uey,uez=',vertex%ue%x,vertex%ue%y,vertex%ue%z
 
 	vertex%nu = vertex%Ein - vertex%e%E
 	vertex%Q2 = 2*vertex%Ein*vertex%e%E*(1.-vertex%ue%z)
@@ -570,6 +577,8 @@ c PB: from resmod507 in first call to semi_physics.f
 	vertex%uq%x = - vertex%e%P*vertex%ue%x / vertex%q
 	vertex%uq%y = - vertex%e%P*vertex%ue%y / vertex%q
 	vertex%uq%z =(vertex%Ein - vertex%e%P*vertex%ue%z)/ vertex%q
+	if (debug(5)) write(6,*)'comp_ev:uqx, uqy,uqz=',vertex%uq%x,vertex%uq%y,vertex%uq%z
+	if (debug(5))write(6,*)'comp_ev:nu,Q,q=',vertex%nu,vertex%Q2,vertex%q
 	if (abs(vertex%uq%x**2+vertex%uq%y**2+vertex%uq%z**2-1).gt.0.01)
      >		stop 'Error in q vector normalization'
 	if (debug(4)) write(6,*)'comp_ev: at 5'
@@ -656,11 +665,11 @@ C DJG If doing Deltas final state for pion production, generate Delta mass
 c factor of 0.7265 to better match data (PB)
 c	     targ%Mrec_struck = Mdelta + 0.5*(0.7265)*Delta_width*tan((2.*grnd()-1.)*pi/2.)
 C switch to relativistic BW for Delta
-	     rn = grnd()
+	     rannum = grnd()
 	     diffmin = 10000.
 	     do i=1,1000
-		if(abs(rn - probsum(i)).lt.diffmin) then
-		   diffmin = abs(rn - probsum(i))
+		if(abs(rannum - probsum(i)).lt.diffmin) then
+		   diffmin = abs(rannum - probsum(i))
 		   targ%Mrec_struck = mass_save(i) * 1000. ! in MeV
 		endif
 	     enddo
@@ -679,19 +688,21 @@ c ranlux substituted for grnd - gh
                rannum=dble(rannum4)
                targ%Mrec_struck = Mrho +
      >           0.5*MrhoW*
-     >           tan((2.*rannum-1.)*atan(2.*450./MrhoW))
-c     >           tan((2.*grnd()-1.)*atan(2.*450./MrhoW))
+c     >           tan((2.*grnd()-1.)*pi/2.)
+c               write(6,*)'rannum', rannum, 'fac', tan((2.*rannum-1.)*pi/2.),
+c     >            'targ%Mrec_struck', targ%Mrec_struck
+     >           tan((2.*grnd()-1.)*atan(2.*450./MrhoW))
             else if (which_eepx.eq.5) then ! omega
 c all other mesons (with width) get the standard formula
                call ranlux (rannum4,1)
                rannum=dble(rannum4)
                targ%Mrec_struck = Momega + 
-     >           0.5*MomegaW*tan((2.*rannum-1.)*pi/2.)
+     >           0.5*MomegaW*tan((2.*grnd()-1.)*pi/2.)
             else if (which_eepx.eq.7) then ! phi
                call ranlux (rannum4,1)
                rannum=dble(rannum4)
                targ%Mrec_struck = Mphi + 
-     >           0.5*MphiW*tan((2.*rannum-1.)*pi/2.)
+     >           0.5*MphiW*tan((2.*grnd()-1.)*pi/2.)
             endif 
 
             if (debug(4)) write(6,*)'comp_ev: at 6.5b',targ%Mrec_struck
@@ -778,6 +789,13 @@ c all other mesons (with width) get the standard formula
 	      success=.false.
 	   endif
 
+        elseif (doing_fileinput) then
+   	vertex%Pmx = vertex%p%P*vertex%up%x - vertex%q*vertex%uq%x
+	vertex%Pmy = vertex%p%P*vertex%up%y - vertex%q*vertex%uq%y
+	vertex%Pmz = vertex%p%P*vertex%up%z - vertex%q*vertex%uq%z
+	vertex%Pm = sqrt(vertex%Pmx**2+vertex%Pmy**2+vertex%Pmz**2)
+	vertex%Em = vertex%nu + targ%Mtar_struck - vertex%p%E
+
 	elseif (doing_phsp) then
 
 	  vertex%p%P = spec%p%P		!????? single arm phsp??
@@ -790,9 +808,8 @@ c all other mesons (with width) get the standard formula
 	if (debug(4)) write(6,*)'comp_ev: at 7'
 
 ! Compute some pion and kaon stuff.  Some of these should be OK for proton too.
-
 	if (doing_pion .or. doing_kaon .or. doing_eepx.or.doing_delta 
-     >     .or. doing_rho .or. doing_semi.or. doing_Xphasespace) then
+     >     .or. doing_rho .or. doing_semi.or. doing_Xphasespace .or. doing_fileinput ) then
 	  W2 = targ%Mtar_struck**2 + 2.*targ%Mtar_struck*vertex%nu - vertex%Q2
 	  main%W = sqrt(abs(W2)) * W2/abs(W2) 
 	  main%epsilon=1./(1. + 2.*(1+vertex%nu**2/vertex%Q2)*tan(vertex%e%theta/2.)**2)
@@ -808,7 +825,8 @@ c all other mesons (with width) get the standard formula
 	  else
 	     main%t = vertex%Q2 - Mh2 + 2*vertex%nu*vertex%p%E -
      >		2*vertex%p%P*vertex%q*cos(main%theta_pq)
-	  endif
+	endif
+             
 	  main%tmin = vertex%Q2 - Mh2 + 2*vertex%p%E*vertex%nu -
      >               2*vertex%p%P*vertex%q
 	  main%q2 = vertex%Q2
@@ -1016,7 +1034,7 @@ CDJG Calculate the "Collins" (phi_pq+phi_targ) and "Sivers"(phi_pq-phi_targ) ang
 ! and A-1 system.  For now, just take Trec for the A-1 system, and ignore
 ! the recoiling struck nucleon (hyperon), so Trec=0 for hydrogen target.
 
-	if (doing_hyd_elast) then
+        if (doing_hyd_elast .or. doing_fileinput) then
 	  vertex%Trec = 0.0
 	else if (doing_deuterium) then
 	  vertex%Pm = vertex%Pmiss
@@ -1067,7 +1085,7 @@ CDJG I should be testing that the missing mass is above two pion
 CDJG threshold! Otherwise, it's just exclusive
 c	   if ((vertex%Emiss**2-vertex%Pmiss**2).lt.(Mp+Mpi0)**2) then
 	   if (((targ%Mtar_struck+vertex%nu-vertex%p%E)**2-vertex%Pmiss**2).lt.(Mp+Mpi0)**2) then
-	      success=.false.
+              success=.false.
 	      return
 	   endif
 	endif
@@ -1140,6 +1158,7 @@ C DJG stinkin' Jacobian!
 	success = .true.
 	if(debug(2)) write(6,*)'comp_ev: at end...'
 	return
+c        endif
 	end
 
 !---------------------------------------------------------------------
@@ -1563,7 +1582,7 @@ c three-momentum transfer (Q)
 
 	if (doing_hyd_elast.or.doing_pion.or.doing_kaon.or.doing_eepx.or.
      >          doing_phsp.or.doing_delta.or.doing_rho.or.doing_semi.or.
-     >          doing_Xphasespace) then !no SF.
+     >          doing_Xphasespace.or.doing_fileinput) then !no SF.
 	  main%SF_weight=1.0
 	else if (use_benhar_sf.and.doing_heavy) then ! Doing Spectral Functions
 	   call sf_lookup_diff(vertex%Em, vertex%Pm, weight)
@@ -1612,7 +1631,7 @@ c three-momentum transfer (Q)
 
 	tgtweight = 1.0
 
-	if (doing_phsp) then
+        if (doing_phsp .or. doing_fileinput) then
 	  main%sigcc = 1.0
 	  main%sigcc_recon = 1.0
 

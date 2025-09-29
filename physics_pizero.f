@@ -1,7 +1,8 @@
       real*8 function peep_pizero(vertex,main)
 
 c     gh - 18.02.04
-      
+
+      USE structureModule
       implicit none
       include 'simulate.inc'
 

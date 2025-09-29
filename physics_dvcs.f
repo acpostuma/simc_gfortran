@@ -1,7 +1,8 @@
       real*8 function peep_dvcs(vertex,main)
 
 c     gh - 18.02.26
-      
+
+      USE structureModule
       implicit none
       include 'simulate.inc'
 
@@ -280,6 +281,7 @@ c Subroutine calculates dsigma/dt/dphi_cm, which is returned as sig_dvcsgmh
 c [ub/MeV^2/rad].
 c gh - 18.02.26
 
+      USE structureModule
       implicit none
       include 'constants.inc'
 
@@ -573,6 +575,7 @@ c                                                                               
 c-------------------------------------------------------------------------------*
 c adapted for SIMC by G.M. Huber, 20.02.13
 
+      USE structureModule
       implicit none
 
       include 'simulate.inc'
