@@ -42,7 +42,7 @@ begin parm debug                ;  (ONES give helpful debug info)
   debug(2) = 0                  ;  into/outa subs.
   debug(3) = 0                  ;  spit out values (init. and main loop).
   debug(4) = 0                  ;  mostly comp_ev, gen_rad diagnostics.
-  debug(5) = 1                  ;  a bit of everything.
+  debug(5) = 0                  ;  a bit of everything.
 end parm debug
 
 begin parm e_arm_accept

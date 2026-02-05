@@ -58,40 +58,14 @@ c
          read(51,*,end=999,err=999) p_4v,p_vz,e_4v,e_vz,w
          count = count + 1
 c input format: proton variables followed by electron variables
-c         if (count .gt. 100) goto 999
 
 c Rotate 4-vectors to their respective frames
 c This is a rotation around the x-axis, which points downwards
-c --> the HMS is at negative angles, and the SHMS at positive angles
 C pythia always generates proton at negative angles
-c         if (e_arm .eq. 1) then 
-c         cth_elec = cos(th_spec_e)
-c         sth_elec = sin(-th_spec_e)
-c         cth_prot= cos(th_spec_p)
-c         sth_prot = sin(th_spec_p)
-c              e_4v(1) = HMS_4v(1)
-c            p_4v(1) = SHMS_4v(1)
-c             e_4v(2) = HMS_4v(2)
-c            p_4v(2) = SHMS_4v(2)
-c             e_4v(3) = HMS_4v(3)
-c            p_4v(3) = SHMS_4v(3)
-c             e_4v(4) = HMS_4v(4)
-c            p_4v(4) = SHMS_4v(4)
-c        else
-c currently in lab frame: rotate into spectrometer frame
          cth_prot = cos(th_spec_p)
          sth_prot = sin(-th_spec_p)
          cth_elec = cos(th_spec_e)
          sth_elec = sin(th_spec_e)
-c             e_4v(1) = SHMS_4v(1)
-c            p_4v(1) = HMS_4v(1)
-c             e_4v(2) = SHMS_4v(2)
-c            p_4v(2) = HMS_4v(2)
-c             e_4v(3) = SHMS_4v(3)
-c            p_4v(3) = HMS_4v(3)
-c             e_4v(4) = SHMS_4v(4)
-c            p_4v(4) = HMS_4v(4)
-c           endif
 	       if(debug(5)) then
              write(*,*) ' '
              write(*,*) ' NEW EVENT: ',count, weight
